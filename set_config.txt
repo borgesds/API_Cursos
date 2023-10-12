@@ -1,0 +1,171 @@
+Instalar bibliotecas:
+alt + ctrl + s
+
+vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
+
+- Flask
+- Flask-Migration >> specify version = 2.5.2
+- Flask-Restful
+- SQLAlchemy
+- Flask-SQLAlchemy
+- marshmallow
+- Marshmallow-sqlalchemy
+- Flask-masrshmallow
+- mysqlclient
+
+1- Dentro do __init__.py da pasta api vai ter a principal montagem:
+    from flask import Flask
+    from flask_restful import Api
+
+    app = Flask(__name__)
+    app.config.from_object('config')  # puchando o arquivo config.py
+
+    api = Api(app)
+
+2- crie um arquivo na raiz chamado config.py que vai receber alguma configurações padrões
+   isso vai ajudar a separar e deixar mais consolidado a api, o primeiro config é:
+        - DEBUG = True
+
+        - Depois vamos configurar o acesso do banco:
+            USERNAME = 'root'
+            PASSWORD = 'essaeasenha'
+            SERVER = 'localhost'
+            DB = 'api_flask'
+            SQLALCHEMY_DATABASE_URI = f'mysql://{USERNAME}:{PASSWORD}@{SERVER}/{DB}'
+            SQLALCHEMY_TRACK_MODIFICATIONS = True
+
+3- Vamos criar um arquivo que vai rodar nossa api, dentro da pasta api cria um arquivo chamado
+   run.py:
+        from api import app
+
+        if __name__ == "__main__":
+            app.run()
+
+4- Dentro de views vamos criar um arquivo chamado curso_views, aqui vamos chamar por exemplo
+   o metodo get:
+        from flask_restful import Resource
+        from api import api
+
+
+        class CursoList(Resource):
+            def get(self):
+                return "Olá Mundo"
+
+
+        api.add_resource(CursoList, '/cursos')
+
+5- Dentro do arquivo __init__.py da pasta api é onde vamos chamar todas as views que criarmos,
+   então la dentro:
+        - from .views import curso_views
+
+6- Volte la no __init__.py e vamos importar algumas bibliotecas e acrescentar algumas alterações:
+    from flask import Flask
+    from flask_restful import Api
+    from flask_sqlalchemy import SQLAlchemy
+    from flask_migrate import Migrate
+
+
+    app = Flask(__name__)
+    app.config.from_object('config')  # puchando o arquivo config.py
+
+    # banco de dados
+    db = SQLAlchemy(app)
+    # config do db
+    migrate = Migrate(app, db)
+
+    api = Api(app)
+
+    from .views import curso_views
+
+7- Vamos em models e criar um arquivo chamado curso_model.py, onde vamos criar a primeira tabela:
+       from api import db
+
+
+        class Curso(db.Model):
+            __tablename__ = 'curso'
+            id = db.Column(db.Integer, primary_key=True,
+                           autoincrement=True, nullable=False)
+            nome = db.Column(db.String(50), nullable=False)
+            descricao = db.Column(db.String(100), nullable=False)
+            data_publicacao = db.Column(db.Date, nullable=False)
+
+8- Sempre que criar um novo arquivo em models tem que colocar no arquivo __init__.py
+   da pasta api:
+        - from .models import curso_model
+
+9- Como criamos a nova tabela em models temos que criar no banco, ou seja fazer uma migration,
+   primeiro você tem que esta dentro da pasta onde esta seu app, depois esta com a venv ativada,
+   depois disso configurado no terminal você vai digitar:
+    - (venv) C:\Users\borge\OneDrive\Documentos\Repos\API_estruturada_2023\venv\Scripts>set FLASK_APP=api.py
+
+    depois:
+
+    - (venv) C:\Users\borge\OneDrive\Documentos\Repos\API_estruturada_2023>flask db init (Cria uma pasta migration)
+
+    depois:
+
+    - (venv) C:\Users\borge\OneDrive\Documentos\Repos\API_estruturada_2023>flask db migrate (Cria o arquivo migration)
+
+    Agora para criar a tabela execute:
+
+    - (venv) C:\Users\borge\OneDrive\Documentos\Repos\API_estruturada_2023>flask db upgrade
+
+10- Vamos criar o schema para validação do dados, vamos em __init__.py na pasta api e adcionar a biblioteca Marshmallow:
+    from flask import Flask
+    from flask_restful import Api
+    from flask_sqlalchemy import SQLAlchemy
+    from flask_migrate import Migrate
+    from flask_marshmallow import Marshmallow
+
+
+    app = Flask(__name__)
+    app.config.from_object('config')  # puchando o arquivo config.py
+
+    # banco de dados
+    db = SQLAlchemy(app)
+    ma = Marshmallow(app)
+    # config do db
+    migrate = Migrate(app, db)
+
+    api = Api(app)
+
+    from .views import curso_views
+    from .models import curso_model
+
+11- Depois de chamar a biblioteca acima vamos na pasta schemas e criar um arquivo curso_schema.py, aqui vamos realizar
+    realmente a validação dos dados:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
