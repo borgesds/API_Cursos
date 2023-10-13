@@ -8,6 +8,6 @@ class CursoSchema(ma.SQLAlchemyAutoSchema):
     load_instance = True
     filds = ('id', 'nome', 'descricao', 'data_publicacao')
 
-    nome = filds.String(required=True)
-    descricao = filds.String(required=True)
-    data_publicacao = filds.Date(required=True)
+    nome = fields.String(required=True)
+    descricao = fields.String(required=True)
+    data_publicacao = fields.Date(required=True)

@@ -134,6 +134,53 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
 
 11- Depois de chamar a biblioteca acima vamos na pasta schemas e criar um arquivo curso_schema.py, aqui vamos realizar
     realmente a validação dos dados:
+        from api import ma
+        from ..models import curso_model
+        from marshmallow import fields
+
+
+        class CursoSchema(ma.SQLAlchemyAutoSchema):
+            model = curso_model.Curso
+            load_instance = True
+            filds = ('id', 'nome', 'descricao', 'data_publicacao')
+
+            nome = fields.String(required=True)
+            descricao = fields.String(required=True)
+            data_publicacao = fields.Date(required=True)
+
+12- Depois vamos na pasta entidade e criar um arquivo curso.py:
+        class Curso():
+            def __int__(self, nome, descricao, data_publicacao):
+                self.__nome = nome
+                self.__descricao = descricao
+                self.__data_publicacao = data_publicacao
+
+            @property
+            def nome(self):
+                return self.__nome
+
+            @nome.setter
+            def nome(self, nome):
+                self.__nome = nome
+
+            @property
+            def descricao(self):
+                return self.__descricao
+
+            @nome.setter
+            def nome(self, descricao):
+                self.__descricao = descricao
+
+            @property
+            def data_publicacao(self):
+                return self.__data_publicacao
+
+            @nome.setter
+            def nome(self, data_publicacao):
+                self.__data_publicacao = data_publicacao
+
+13- Agora vamos criar um arquivo chamado curso_service.py na pasta service, ela vai ser usada para o arquivo
+    se comunicar diretamento com SQLAlchimy:
 
 
 
