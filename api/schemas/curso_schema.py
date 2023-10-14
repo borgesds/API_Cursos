@@ -4,9 +4,10 @@ from marshmallow import fields
 
 
 class CursoSchema(ma.SQLAlchemyAutoSchema):
-    model = curso_model.Curso
-    load_instance = True
-    filds = ('id', 'nome', 'descricao', 'data_publicacao')
+    class Meta:
+        model = curso_model.Curso
+        load_instance = True
+        filds = ('id', 'nome', 'descricao', 'data_publicacao')
 
     nome = fields.String(required=True)
     descricao = fields.String(required=True)

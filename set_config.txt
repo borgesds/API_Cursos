@@ -140,9 +140,10 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
 
 
         class CursoSchema(ma.SQLAlchemyAutoSchema):
-            model = curso_model.Curso
-            load_instance = True
-            filds = ('id', 'nome', 'descricao', 'data_publicacao')
+            class Meta:
+                model = curso_model.Curso
+                load_instance = True
+                filds = ('id', 'nome', 'descricao', 'data_publicacao')
 
             nome = fields.String(required=True)
             descricao = fields.String(required=True)
@@ -181,8 +182,28 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
 
 13- Agora vamos criar um arquivo chamado curso_service.py na pasta service, ela vai ser usada para o arquivo
     se comunicar diretamento com SQLAlchimy:
+        from ..models import curso_model
+        from api import db
 
 
+        def cadatrar_curso(curso):
+            curso_bd = curso_model.Curso(nome=curso.nome,
+                                         descricao=curso.descricao,
+                                         data_publicacao=curso.data_publicacao)
+            db.session.add(curso_bd)
+            db.session.commit()
+            return curso_bd
+
+14- Depois de todas as configurações feitas anteriores vamos focar em dois arquivos, o __init__.py e o
+    curso_views.py para começar a criar o CRUD, cadastrando curso.
+
+15- Para cadastrar o curso vamo em curso_views.py e importa:
+        - from ..schemas import curso_schema
+        - from flask import request, make_response, jsonify
+        - from ..entidades import curso
+        - from ..services import curso_service
+
+    Agora vamos criar nossas funções para cadastras com o metodo post:
 
 
 
