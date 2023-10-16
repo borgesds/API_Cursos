@@ -230,7 +230,16 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
 
                 return make_response(x, 201)
 
-16-
+16- Vamos listar os dados no banco, dentro de curso_service.py crie uma função que vai chamar esses dados:
+        def listar_cursos():
+        cursos = curso_model.Curso.query.all()
+        return cursos
+
+        - Depois vai em curso_views.py e na função get que já existe faça alteração chamando a lista_cursos:
+                def get(self):
+                    cursos = curso_service.listar_cursos()
+                    cs = curso_schema.CursoSchema(many=True)
+                    return make_response(cs.jsonify(cursos), 200)
 
 
 

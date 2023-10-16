@@ -8,7 +8,9 @@ from ..services import curso_service
 
 class CursoList(Resource):
     def get(self):
-        return "Olá Mundo"
+        cursos = curso_service.listar_cursos()
+        cs = curso_schema.CursoSchema(many=True)
+        return make_response(cs.jsonify(cursos), 200)
 
     # cadastrar
     def post(self):
