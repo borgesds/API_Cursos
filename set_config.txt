@@ -265,6 +265,43 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
                 pass
 
         - Com isso vamo criar uma nova rota:
+            api.add_resource(CursoDetail, '/cursos/<int:id>')
+
+19- Criar uma função de atualização dentro de  curso_views.py e o que ja deixamos preparada antes:
+        - Antes la em curso_service.py vamos criar uma fução  que vai fazer essa atualização:
+            def atualiza_curso(curso_anterior, curso_novo):
+                curso_anterior.nome = curso_novo.nome
+                curso_anterior.descricao = curso_novo.descricao
+                curso_anterior.data_publicacao = curso_novo.data_publicacao
+                db.session.commit()
+
+        - Agora em curso_views.py:
+                def put(self, id):
+                    curso_bd = curso_service.listar_curso_id(id)
+
+                    if curso_bd is None:
+                        return make_response(jsonify("Curso não foi encontrado"), 404)
+
+                    cs = curso_schema.CursoSchema()
+                    validate = cs.validate(request.json)  # validar os dados
+
+                    if validate:
+                        return make_response(jsonify(validate), 400)
+                    else:
+                        nome = request.json["nome"]
+                        descricao = request.json["descricao"]
+                        data_publicacao = request.json["data_publicacao"]
+
+                        novo_curso = curso.Curso(nome=nome,
+                                                 descricao=descricao,
+                                                 data_publicacao=data_publicacao)
+
+                        curso_service.atualiza_curso(curso_bd, novo_curso)
+                        curso_atualizado = curso_service.listar_curso_id(id)
+
+                        return make_response(cs.jsonify(curso_atualizado), 200)
+
+20-
 
 
 
