@@ -301,7 +301,23 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
 
                         return make_response(cs.jsonify(curso_atualizado), 200)
 
-20-
+20- Agora so falta o delete para finalizar a primeira parte da API, em curso_service.py cria uma função:
+        def remove_curso(curso):
+            db.session.delete(curso)
+            db.session.commit()
+
+        - Ai lá em curso_views.py vamos criar a função que vai receber o id do curso e chamar a função anterior:
+             def delete(self, id):
+                curso_bd = curso_service.listar_curso_id(id)
+
+                if curso_bd is None:
+                    return make_response(jsonify("Curso não foi encontrado"), 404)
+
+                curso_service.remove_curso(curso_bd)
+
+                return make_response(jsonify("Curso excluido com sucesso"), 204)
+
+21-
 
 
 
