@@ -1,8 +1,7 @@
-class Curso():
-    def __init__(self, nome, descricao, data_publicacao):
+class Formacao():
+    def __init__(self, nome, descricao):
         self.__nome = nome
         self.__descricao = descricao
-        self.__data_publicacao = data_publicacao
 
     @property
     def nome(self):
@@ -19,12 +18,3 @@ class Curso():
     @descricao.setter
     def descricao(self, descricao):
         self.__descricao = descricao
-
-    @property
-    def data_publicacao(self):
-        return self.__data_publicacao
-
-    @data_publicacao.setter
-    def data_publicacao(self, data_publicacao):
-        self.__data_publicacao = data_publicacao
-

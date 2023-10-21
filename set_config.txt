@@ -317,7 +317,177 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
 
                 return make_response(jsonify("Curso excluido com sucesso"), 204)
 
-21-
+21- A PARTIR DAQUI VAMOS FAZER RELACIONAMENTO ENTRE AS TABELAS
+
+22- Para começar vamos em entidade e criar um novo arquivo chamado formacao.py:
+        class Formacao():
+            def __init__(self, nome, descricao):
+                self.__nome = nome
+                self.__descricao = descricao
+
+            @property
+            def nome(self):
+                return self.__nome
+
+            @nome.setter
+            def nome(self, nome):
+                self.__nome = nome
+
+            @property
+            def descricao(self):
+                return self.__descricao
+
+            @descricao.setter
+            def descricao(self, descricao):
+                self.__descricao = descricao
+
+23- Agora vamos a pasta models e criar um arquivo chamado formacao_model.py, criar a tabela no banco:
+        from api import db
+
+
+        # criar tabela
+        class Formacao(db.Model):
+            __tablename__ = 'curso'
+            id = db.Column(db.Integer, primary_key=True,
+                           autoincrement=True, nullable=False)
+            nome = db.Column(db.String(50), nullable=False)
+            descricao = db.Column(db.String(100), nullable=False)
+
+24- Na pasta schema crie um arquivo chamado formacao_schema.py:
+        from api import ma
+        from ..models import formacao_model
+        from marshmallow import fields
+
+
+        class FormacaoSchema(ma.SQLAlchemyAutoSchema):
+            class Meta:
+                model = formacao_model.Formacao
+                load_instance = True
+                filds = ('id', 'nome', 'descricao')
+
+            nome = fields.String(required=True)
+            descricao = fields.String(required=True)
+
+25- Agora para pasta services crie o arquivo chamado  fomacao_service.py:
+    from ..models import formacao_model
+    from api import db
+
+
+    def cadatrar_formacao(formacao):
+        formacao_bd = formacao_model.Formacao(nome=formacao.nome,
+                                           descricao=formacao.descricao)
+        db.session.add(formacao_bd)
+        db.session.commit()
+        return formacao_bd
+
+
+    def listar_formacao():
+        formacao = formacao_model.Formacao.query.all()
+        return formacao
+
+
+    def listar_formacao_id(id):
+        formacao = formacao_model.Formacao.query.filter_by(id=id).first()
+        return formacao
+
+
+    def atualiza_formacao(formacao_anterior, formacao_novo):
+        formacao_anterior.nome = formacao_novo.nome
+        formacao_anterior.descricao = formacao_novo.descricao
+        db.session.commit()
+        return "Curso atualizado com sucesso"
+
+
+    def remove_formacao(formacao):
+        db.session.delete(formacao)
+        db.session.commit()
+
+26- Na pasta views cria um arquivo chamado formacao_views.py:
+        from flask_restful import Resource
+        from api import api
+        from ..schemas import formacao_schema
+        from flask import request, make_response, jsonify
+        from ..entidades import formacao
+        from ..services import formacao_service
+
+
+        class FormacaoList(Resource):
+            def get(self):
+                formacoes = formacao_service.listar_formacoes()
+                fs = formacao_schema.FormacaoSchema(many=True)
+                return make_response(fs.jsonify(formacoes), 200)
+
+            # cadastrar
+            def post(self):
+                # validar a tipagem do input
+                fs = formacao_schema.FormacaoSchema()
+                validate = fs.validate(request.json)
+
+                # se tiver erro
+                if validate:
+                    return make_response(jsonify(validate), 400)
+                else:
+                    nome = request.json["nome"]
+                    descricao = request.json["descricao"]
+
+                    nova_formacao = formacao.Formacao(nome=nome,
+                                                      descricao=descricao)
+                    resultado = formacao_service.cadatrar_formacao(nova_formacao)
+                    x = fs.jsonify(resultado)
+
+                    return make_response(x, 201)
+
+
+        class FormacaoDetail(Resource):
+            def get(self, id):
+                formacao = formacao_service.listar_formacao_id(id)
+
+                if formacao is None:
+                    return make_response(jsonify("Formação não foi encontrado"), 404)
+
+                cs = formacao_schema.FormacaoSchema()
+
+                return make_response(cs.jsonify(formacao), 200)
+
+            def put(self, id):
+                formacao_bd = formacao_service.listar_formacao_id(id)
+
+                if formacao_bd is None:
+                    return make_response(jsonify("Formação não foi encontrado"), 404)
+
+                fs = formacao_schema.FormacaoSchema()
+                validate = fs.validate(request.json)  # validar os dados
+
+                if validate:
+                    return make_response(jsonify(validate), 400)
+                else:
+                    nome = request.json["nome"]
+                    descricao = request.json["descricao"]
+
+                    nova_formacao = formacao.Formacao(nome=nome,
+                                                      descricao=descricao)
+
+                    formacao_service.atualiza_formacao(formacao_bd, nova_formacao)
+                    formacao_atualizado = formacao_service.listar_formacao_id(id)
+
+                    return make_response(fs.jsonify(formacao_atualizado), 200)
+
+            def delete(self, id):
+                formacao_bd = formacao_service.listar_curso_id(id)
+
+                if formacao_bd is None:
+                    return make_response(jsonify("Formação não foi encontrado"), 404)
+
+                formacao_service.remove_formacao(formacao_bd)
+
+                return make_response(jsonify("Formação excluido com sucesso"), 204)
+
+
+        api.add_resource(FormacaoList, '/formacoes')
+        api.add_resource(FormacaoDetail, '/formacoes/<int:id>')
+
+27-
+
 
 
 
