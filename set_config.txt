@@ -486,7 +486,40 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
         api.add_resource(FormacaoList, '/formacoes')
         api.add_resource(FormacaoDetail, '/formacoes/<int:id>')
 
-27-
+27- Antes de testar vamos vazer uma alteração no __ini__.py da pasta raiz api, chamando o formacao_views e
+    formacao_model:
+        from flask import Flask
+        from flask_restful import Api
+        from flask_sqlalchemy import SQLAlchemy
+        from flask_migrate import Migrate
+        from flask_marshmallow import Marshmallow
+
+
+        app = Flask(__name__)
+        app.config.from_object('config')  # puchando o arquivo config.py
+
+        # banco de dados
+        db = SQLAlchemy(app)
+        ma = Marshmallow(app)
+        # config do db
+        migrate = Migrate(app, db)
+
+        api = Api(app)
+
+        from .views import curso_views, formacao_views
+        from .models import curso_model, formacao_model
+
+28- Para que crie a nova tabela vamos ter que rodar a migration, abra o prompt vai na pasta do projeto:
+        - cd C:\Users\borge\OneDrive\Documentos\Repos\Github\API_Cursos\venv\Scripts
+            - activate (para rodar o venv)
+
+        - Volte ate a pasta raiz:
+            - (venv) C:\Users\borge\OneDrive\Documentos\Repos\Github\API_Cursos
+                - set FLASK_APP=api.py (Windowns) ou export FLASK_APP=api.py (Linux)
+
+            - (venv) C:\Users\borge\OneDrive\Documentos\Repos\Github\API_Cursos
+                - flask db migrate (digite no terminal para roda o migrate)
+                - flask db upgrade (digite no terminal para criar tabelas)
 
 
 
