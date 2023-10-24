@@ -521,6 +521,132 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
                 - flask db migrate (digite no terminal para roda o migrate)
                 - flask db upgrade (digite no terminal para criar tabelas)
 
+29- Agora vamo criar uma relação entre as duas tabelas, o famoso 1 --> * ou * <-- 1, e o primeiro passo
+    é ir na pasta models e começar a criar esse relacionamento pelo arquivo curso_model.py:
+        from api import db
+        from ..models import formacao_model
+
+
+        # criar tabela
+        class Curso(db.Model):
+            __tablename__ = 'curso'
+            id = db.Column(db.Integer, primary_key=True,
+                           autoincrement=True, nullable=False)
+            nome = db.Column(db.String(50), nullable=False)
+            descricao = db.Column(db.String(100), nullable=False)
+            data_publicacao = db.Column(db.Date, nullable=False)
+
+            formacao_id = db.Column(db.Integer, db.ForeignKey("formacao.id"))
+            formcao = db.relationship(formacao_model.Formacao, backref=db.backref("cursos",
+                                                                                  lazy="dynamic"))
+
+30- Vamos na pasta entidade no arquivo curso.py e vamos adcionar formação na class:
+        class Curso():
+            def __init__(self, nome, descricao, data_publicacao, formacao):
+                self.__nome = nome
+                self.__descricao = descricao
+                self.__data_publicacao = data_publicacao
+                self.__formacao = formacao
+
+            @property
+            def nome(self):
+                return self.__nome
+
+            @nome.setter
+            def nome(self, nome):
+                self.__nome = nome
+
+            @property
+            def descricao(self):
+                return self.__descricao
+
+            @descricao.setter
+            def descricao(self, descricao):
+                self.__descricao = descricao
+
+            @property
+            def data_publicacao(self):
+                return self.__data_publicacao
+
+            @data_publicacao.setter
+            def data_publicacao(self, data_publicacao):
+                self.__data_publicacao = data_publicacao
+
+            @property
+            def formacao(self):
+                return self.__formacao
+
+            @formacao.setter
+            def formacao(self, formacao):
+                self.__formacao = formacao
+
+31- Na pasta schema vamos adicionar o campo formacao la no arquivo curso_schema.py:
+        from api import ma
+        from ..models import curso_model
+        from marshmallow import fields
+
+
+        class CursoSchema(ma.SQLAlchemyAutoSchema):
+            class Meta:
+                model = curso_model.Curso
+                load_instance = True
+                filds = ('id', 'nome', 'descricao', 'data_publicacao', 'formacao')
+
+            nome = fields.String(required=True)
+            descricao = fields.String(required=True)
+            data_publicacao = fields.Date(required=True)
+            formacao = fields.String(required=True)
+
+32- Em services no arquivo curso_service.py tambem vamo fazer essa adição de formação:
+        from ..models import curso_model
+        from api import db
+
+
+        def cadatrar_curso(curso):
+            curso_bd = curso_model.Curso(nome=curso.nome,
+                                         descricao=curso.descricao,
+                                         data_publicacao=curso.data_publicacao,
+                                         formacao=curso.formacao)
+            db.session.add(curso_bd)
+            db.session.commit()
+            return curso_bd
+
+
+        def listar_cursos():
+            cursos = curso_model.Curso.query.all()
+            return cursos
+
+
+        def listar_curso_id(id):
+            curso = curso_model.Curso.query.filter_by(id=id).first()
+            return curso
+
+
+        def atualiza_curso(curso_anterior, curso_novo):
+            curso_anterior.nome = curso_novo.nome
+            curso_anterior.descricao = curso_novo.descricao
+            curso_anterior.data_publicacao = curso_novo.data_publicacao
+            curso_anterior.formacao = curso_novo.formacao
+            db.session.commit()
+            return "Curso atualizado com sucesso"
+
+
+        def remove_curso(curso):
+            db.session.delete(curso)
+            db.session.commit()
+
+33- Depois que fazer essa alterações vamos rodar o migrate para cirar as alterações:
+        - cd C:\Users\borge\OneDrive\Documentos\Repos\Github\API_Cursos\venv\Scripts
+            - activate (para rodar o venv)
+
+        - Volte ate a pasta raiz:
+            - (venv) C:\Users\borge\OneDrive\Documentos\Repos\Github\API_Cursos
+                - set FLASK_APP=api.py (Windowns) ou export FLASK_APP=api.py (Linux)
+
+            - (venv) C:\Users\borge\OneDrive\Documentos\Repos\Github\API_Cursos
+                - flask db migrate (digite no terminal para roda o migrate)
+                - flask db upgrade (digite no terminal para criar tabelas)
+
 
 
 
