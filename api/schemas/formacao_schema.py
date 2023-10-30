@@ -7,7 +7,7 @@ class FormacaoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = formacao_model.Formacao
         load_instance = True
-        filds = ('id', 'nome', 'descricao')
+        fields = ('id', 'nome', 'descricao')
 
     nome = fields.String(required=True)
     descricao = fields.String(required=True)

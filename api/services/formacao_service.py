@@ -4,7 +4,7 @@ from api import db
 
 def cadatrar_formacao(formacao):
     formacao_bd = formacao_model.Formacao(nome=formacao.nome,
-                                       descricao=formacao.descricao)
+                                          descricao=formacao.descricao)
     db.session.add(formacao_bd)
     db.session.commit()
     return formacao_bd
@@ -30,3 +30,4 @@ def atualiza_formacao(formacao_anterior, formacao_novo):
 def remove_formacao(formacao):
     db.session.delete(formacao)
     db.session.commit()
+

@@ -12,5 +12,5 @@ class Curso(db.Model):
     data_publicacao = db.Column(db.Date, nullable=False)
 
     formacao_id = db.Column(db.Integer, db.ForeignKey("formacao.id"))
-    formcao = db.relationship(formacao_model.Formacao, backref=db.backref("cursos",
-                                                                          lazy="dynamic"))
+    formacao = db.relationship(formacao_model.Formacao, backref=db.backref("cursos",
+                                                                           lazy="dynamic"))
