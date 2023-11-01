@@ -751,8 +751,39 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
         api.add_resource(CursoList, '/cursos')
         api.add_resource(CursoDetail, '/cursos/<int:id>')
 
-35-
+35- Vamos cursos de uma formação, ou seja, iremos colocar dentro de formação os cursos que fazem parte
+    do tipo de formação. Vamos em formacao_schema.py para adicionar o curso_schema e fazer essa relação:
+        from api import ma
+        from ..models import formacao_model
+        from marshmallow import fields
+        from ..schemas import curso_schema  # <====
 
+
+        class FormacaoSchema(ma.SQLAlchemyAutoSchema):
+            class Meta:
+                model = formacao_model.Formacao
+                load_instance = True
+                fields = ('id', 'nome', 'descricao', 'cursos')  # <==== add cursos (nome do array)
+
+            nome = fields.String(required=True)
+            descricao = fields.String(required=True)
+            # Aqui vamo pegar todos os cursos e listar eles só pelo id e nome # <====
+            cursos = fields.List(fields.Nested(curso_schema.CursoSchema, only=('id', 'nome')))
+
+            - Retorno:
+                 {
+                    "cursos": [
+                        {
+                            "id": 1,
+                            "nome": "Curso Python Nivel 1"
+                        }
+                    ],
+                    "descricao": "Focado emanalise de dados para programadores",
+                    "id": 1,
+                    "nome": "Analise de Dados"
+                }
+
+36-
 
 
 
