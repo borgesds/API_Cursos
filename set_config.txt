@@ -783,8 +783,104 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
                     "nome": "Analise de Dados"
                 }
 
-36-
+36- Vamos criar uma relação de N ---> N, um relação com professor do curso com o tipo de formação. Para isso
+    vai na pasta entidade e crie um novo arquivo chamado professor.py:
+        class Professor():
+        def __init__(self, nome, idade, titulo):
+            self.__nome = nome
+            self.__idade = idade
+            self.__titulo = titulo
 
+        @property
+        def nome(self):
+            return self.__nome
+
+        @nome.setter
+        def nome(self, nome):
+            self.__nome = nome
+
+        @property
+        def idade(self):
+            return self.__idade
+
+        @idade.setter
+        def idade(self, idade):
+            self.__idade = idade
+
+        @property
+        def titulo(self):
+            return self.__titulo
+
+        @titulo.setter
+        def titulo(self, titulo):
+            self.__titulo = titulo
+
+37- Agora na pasta model criar o arquivo professor_model.py para criar o esqueleto do banco:
+    from api import db
+
+
+    # criar tabela
+    class Formacao(db.Model):
+        __tablename__ = 'professor'
+        id = db.Column(db.Integer, primary_key=True,
+                       autoincrement=True, nullable=False)
+        nome = db.Column(db.String(50), nullable=False)
+        idade = db.Column(db.integer, nullable=False)
+        titulo = db.Column(db.String(50), nullable=True)
+
+38- Na pasta schema vamos criar o arquvio professor_schema.py:
+    from api import ma
+    from ..models import professor_model
+    from marshmallow import fields
+
+
+    class ProfessorSchema(ma.SQLAlchemyAutoSchema):
+        class Meta:
+            model = professor_model.Professor
+            load_instance = True
+            fields = ('id', 'nome', 'idade', 'titulo')
+
+        nome = fields.String(required=True)
+        idade = fields.Integer(required=True)
+        titulo = fields.String(required=True)
+
+39- Na pasta services e criar o arquivo professor_service.py:
+        from ..models import professor_model
+        from api import db
+
+
+        def cadatrar_professor(professor):
+            professor_bd = professor_model.Professor(nome=professor.nome,
+                                                     idade=professor.idade,
+                                                     titulo=professor.titulo)
+            db.session.add(professor_bd)
+            db.session.commit()
+            return professor_bd
+
+
+        def listar_professores():
+            professores = professor_model.Professor.query.all()
+            return professores
+
+
+        def listar_formacao_id(id):
+            professor = professor_model.Professor.query.filter_by(id=id).first()
+            return professor
+
+
+        def atualiza_professor(professor_anterior, professor_novo):
+            professor_anterior.nome = professor_novo.nome
+            professor_anterior.idade = professor_novo.idade
+            professor_anterior.titulo = professor_novo.titulo
+            db.session.commit()
+            return "Curso atualizado com sucesso"
+
+
+        def remove_professor(professor):
+            db.session.delete(professor)
+            db.session.commit()
+
+40- Agora na pasta views crie um arquivo chamdo professor_views.py:
 
 
 

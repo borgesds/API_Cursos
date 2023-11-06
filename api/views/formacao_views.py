@@ -40,9 +40,9 @@ class FormacaoDetail(Resource):
         if formacao is None:
             return make_response(jsonify("Formação não foi encontrado"), 404)
 
-        cs = formacao_schema.FormacaoSchema()
+        fs = formacao_schema.FormacaoSchema()
 
-        return make_response(cs.jsonify(formacao), 200)
+        return make_response(fs.jsonify(formacao), 200)
 
     def put(self, id):
         formacao_bd = formacao_service.listar_formacao_id(id)
@@ -68,7 +68,7 @@ class FormacaoDetail(Resource):
             return make_response(fs.jsonify(formacao_atualizado), 200)
 
     def delete(self, id):
-        formacao_bd = formacao_service.listar_curso_id(id)
+        formacao_bd = formacao_service.listar_formacao_id(id)
 
         if formacao_bd is None:
             return make_response(jsonify("Formação não foi encontrado"), 404)
