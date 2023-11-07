@@ -83,4 +83,4 @@ class ProfessorDetail(Resource):
 
 
 api.add_resource(ProfessorList, '/professores')
-api.add_resource(ProfessorDetail, '/professores/<int:id>')
+api.add_resource(ProfessorDetail, '/professor/<int:id>')
