@@ -998,6 +998,63 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
                 - flask db migrate
                 - flask db upgrade
 
+43- Vamos criar o relacionamento da tabela professores para tabela de formação como N ---> N.
+    Para isso vamos fazer novas configurações nos arquivos dentro da pasta model, o formacao_model e
+    professor_model:
+
+        - Vamos no arquivo formacao_model.py primeiro:
+            from api import db
+            from .professor_model import Professor
+
+            # Criação da tabela que vai fazer a ligação entre professor e formacao
+            professor_formcao = db.Table('professor_formacao',
+                                         db.Column('professor_id', db.Integer,
+                                                   db.ForeignKey('professor.id'),
+                                                   primary_key=True, nullable=False),
+                                         db.Column('formacao_id', db.Integer,
+                                                   db.ForeignKey('formacao.id'),
+                                                   primary_key=True, nullable=False))
+
+
+            # criar tabela
+            class Formacao(db.Model):
+                __tablename__ = 'formacao'
+                id = db.Column(db.Integer, primary_key=True,
+                               autoincrement=True, nullable=False)
+                nome = db.Column(db.String(50), nullable=False)
+                descricao = db.Column(db.String(100), nullable=False)
+                professor = db.relationship(Professor,
+                                            secondary='professor_formacao',  # Faz a ligação com a nova tabela
+                                            back_populates='formacoes')  # Onde os dados vão ser puxados
+
+        - Agora vamos no arquivo professor_model:
+            from api import db
+
+
+            # criar tabela
+            class Professor(db.Model):
+                __tablename__ = 'professor'
+                id = db.Column(db.Integer, primary_key=True,
+                               autoincrement=True, nullable=False)
+                nome = db.Column(db.String(50), nullable=False)
+                idade = db.Column(db.Integer, nullable=False)
+                titulo = db.Column(db.String(50), nullable=True)
+                professor = db.relationship("Formacao",  # Como foi criado a relação dentro do formacao_model, fica assim
+                                            secondary='professor_formacao',  # Faz a ligação com a nova tabela
+                                            back_populates='professores')  # Onde os dados vão ser puxados
+
+44- Depois de todas essas configurações vamos fazer o migration, siga os passos:
+        - Ative o ambiente virtual no prompt
+
+        - Rode:
+            (venv) c:\Users\borge\OneDrive\Documentos\Repos\Github\API_Cursos>
+                - set FLASK_APP=api.py
+                - flask db migrate
+                - flask db upgrade
+
+45- Nesse ponto vamos implementar professores em formações
+
+
 
 
 
