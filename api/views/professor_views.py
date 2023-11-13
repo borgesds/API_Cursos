@@ -4,13 +4,16 @@ from ..schemas import professor_schema
 from flask import request, make_response, jsonify
 from ..entidades import professor
 from ..services import professor_service
+from ..paginate import paginate  # <==============
+from ..models.professor_model import Professor  # <==============
 
 
 class ProfessorList(Resource):
     def get(self):
-        professores = professor_service.listar_professores()
+        # professores = professor_service.listar_professores()
         ps = professor_schema.ProfessorSchema(many=True)
-        return make_response(ps.jsonify(professores), 200)
+        # return make_response(ps.jsonify(professores), 200)
+        return paginate(Professor, ps)
 
     # cadastrar
     def post(self):

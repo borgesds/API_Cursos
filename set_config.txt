@@ -1265,8 +1265,8 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
 
 
         def paginate(model, schema):
-            page = int(request.args.get('page'), 1)
-            per_page = int(request.args.get('per_page'), 3)
+            page = int(request.args.get('page', 1))
+            per_page = int(request.args.get('per_page', 3))
             page_obj = model.query.paginate(page=page, per_page=per_page)
 
             next = url_for(
@@ -1291,6 +1291,159 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
 
                 'results': schema.dump(page_obj.items)
             }
+
+51- Para implementar a paginação criada vamos na pasta views e configurar os arquivos la dentro.
+        - O primeiro arquivo vai ser curso_views.py, vamos trabalhar na Class CursoList(Resource)
+          no metodo get():
+                from flask_restful import Resource
+                from api import api
+                from ..schemas import curso_schema
+                from flask import request, make_response, jsonify
+                from ..entidades import curso
+                from ..services import curso_service, formacao_service
+                from ..paginate import paginate  # <==============
+                from ..models.curso_model import Curso  # <==============
+
+
+                class CursoList(Resource):
+                    def get(self):
+                        # cursos = curso_service.listar_cursos()
+                        cs = curso_schema.CursoSchema(many=True)
+                        # return make_response(cs.jsonify(cursos), 200)
+                        return paginate(Curso, cs)  # <==============
+
+        - O segundo arquivo vai ser fomacao_views.py:
+                from flask_restful import Resource
+                from api import api
+                from ..schemas import formacao_schema
+                from flask import request, make_response, jsonify
+                from ..entidades import formacao
+                from ..services import formacao_service
+                from ..paginate import paginate  # <==============
+                from ..models.formacao_model import Formacao  # <==============
+
+
+                class FormacaoList(Resource):
+                    def get(self):
+                        # formacoes = formacao_service.listar_formacoes()
+                        fs = formacao_schema.FormacaoSchema(many=True)
+                        # return make_response(fs.jsonify(formacoes), 200)
+                        return paginate(Formacao, fs)  # <==============
+
+        - O terceiro arquivo vai ser professor_views.py:
+                from flask_restful import Resource
+                from api import api
+                from ..schemas import professor_schema
+                from flask import request, make_response, jsonify
+                from ..entidades import professor
+                from ..services import professor_service
+                from ..paginate import paginate  # <==============
+                from ..models.professor_model import Professor  # <==============
+
+
+                class ProfessorList(Resource):
+                    def get(self):
+                        # professores = professor_service.listar_professores()
+                        ps = professor_schema.ProfessorSchema(many=True)
+                        # return make_response(ps.jsonify(professores), 200)
+                        return paginate(Professor, ps)
+
+
+
+52- #### <============== Vamos implementar segurança e documentação a partir daqui.  #### <==============
+
+53- Vamos em configurações, depois interpreter ai clica no + e adicione o Flask-JWT-Extended. Outra biblioteca é
+    a passlib para criptografar senha.
+
+54- Dentro da pasta api abra o arquivo __init__.py:
+        from flask import Flask
+        from flask_restful import Api
+        from flask_sqlalchemy import SQLAlchemy
+        from flask_migrate import Migrate
+        from flask_marshmallow import Marshmallow
+        from flask_jwt_extended import JWTManager  # <======
+
+
+        app = Flask(__name__)
+        app.config.from_object('config')  # puchando o arquivo config.py
+
+        # banco de dados
+        db = SQLAlchemy(app)
+        ma = Marshmallow(app)
+        # config do db
+        migrate = Migrate(app, db)
+
+        api = Api(app)
+
+        jwt = JWTManager(app)  # <======
+
+        from .views import curso_views, formacao_views, professor_views
+        from .models import curso_model, formacao_model, professor_model
+
+55- Para trabalhar com o JWT temos que usar um arquivo que tenha uma SECRET_KEY, então vamos la no arquivo
+    config.py e fazer algumas alterações:
+        DEBUG = True
+
+        USERNAME = 'root'
+        PASSWORD = 'essaeasenha'
+        SERVER = 'localhost'
+        DB = 'bdgeral'
+
+        SQLALCHEMY_DATABASE_URI = f'mysql://{USERNAME}:{PASSWORD}@{SERVER}/{DB}'
+        SQLALCHEMY_TRACK_MODIFICATIONS = True
+
+        SECRET_KEY='aplicacao_flask'   # <======
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

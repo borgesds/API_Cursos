@@ -4,13 +4,16 @@ from ..schemas import formacao_schema
 from flask import request, make_response, jsonify
 from ..entidades import formacao
 from ..services import formacao_service
+from ..paginate import paginate
+from ..models.formacao_model import Formacao
 
 
 class FormacaoList(Resource):
     def get(self):
-        formacoes = formacao_service.listar_formacoes()
+        # formacoes = formacao_service.listar_formacoes()
         fs = formacao_schema.FormacaoSchema(many=True)
-        return make_response(fs.jsonify(formacoes), 200)
+        # return make_response(fs.jsonify(formacoes), 200)
+        return paginate(Formacao, fs)
 
     # cadastrar
     def post(self):
