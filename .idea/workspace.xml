@@ -5,14 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="948bc400-8005-48ec-911c-f88e7c01952c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/api/entidades/usuario.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/models/usuario_model.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/schemas/usuario_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/services/usuario_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/paginate.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/paginate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/schemas/curso_schema.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/schemas/curso_schema.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/views/curso_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/views/curso_views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/views/formacao_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/views/formacao_views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/views/professor_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/views/professor_views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/set_config.txt" beforeDir="false" afterPath="$PROJECT_DIR$/set_config.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -44,17 +41,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/borge/OneDrive/Documentos/Repos/Github/API_Cursos",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/borge/OneDrive/Documentos/Repos/Github/API_Cursos&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="run" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="API_Cursos" />

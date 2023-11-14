@@ -1394,7 +1394,92 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
 
         SECRET_KEY='aplicacao_flask'   # <======
 
+56- Agora temos que criar no banco a tabela usuarios, e vamos começa pela pasta entidade criando um arquivo
+    chamado usuario.py:
+        class Professor():
+            def __init__(self, nome, email, senha):
+                self.__nome = nome
+                self.__email = email
+                self.senha = senha
 
+            @property
+            def nome(self):
+                return self.__nome
+
+            @nome.setter
+            def nome(self, nome):
+                self.__nome = nome
+
+            @property
+            def email(self):
+                return self.__email
+
+            @email.setter
+            def email(self, email):
+                self.__email = email
+
+            @property
+            def senha(self):
+                return self.__senha
+
+            @senha.setter
+            def senha(self, senha):
+                self.__senha = senha
+
+57- Criar um novo arquivo da pasta model chamando usuario_model.py:
+        from api import db
+        from passlib.hash import pbkdf2_sha256
+
+
+        # criar tabela
+        class Usuario(db.Model):
+            __tablename__ = 'usuarop'
+            id = db.Column(db.Integer, primary_key=True,
+                           autoincrement=True, nullable=False)
+            nome = db.Column(db.String(50), nullable=False)
+            email = db.Column(db.String(100), nullable=False)
+            senha = db.Column(db.String(255), nullable=True)
+
+            # vamos criptografar a senha para enviar ao banco
+            def encriptar_senha(self):
+                self.senha = pbkdf2_sha256.hash(self.senha)
+
+            # verificar qual o formato da senha criptografada
+            def ver_senha(self, senha):
+                return pbkdf2_sha256.verify(senha, self.senha)
+
+
+58- Agora na pasta schema criar um arquivo chamado usuario_shema.py:
+        from api import ma
+        from ..models import usuario_model
+        from marshmallow import fields
+
+
+        class ProfessorSchema(ma.SQLAlchemyAutoSchema):
+            class Meta:
+                model = usuario_model.Usuario
+                load_instance = True
+                fields = ('id', 'nome', 'email', 'senha')
+
+            nome = fields.String(required=True)
+            email = fields.String(required=True)
+            senha = fields.String(required=True)
+
+59- Criar agora um arquivo na pasta services chamo usuario_service.py:
+        from ..models import usuario_model
+        from api import db
+
+
+        def cadatrar_usuario(usuario):
+            usuario_bd = usuario_model.Usuario(nome=usuario.nome,
+                                               idade=usuario.email,
+                                               titulo=usuario.senha)
+            # codificar a senha
+            usuario_bd.encriptar_senha()
+
+            db.session.add(usuario_bd)
+            db.session.commit()
+            return usuario_bd
 
 
 
