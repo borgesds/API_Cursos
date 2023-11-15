@@ -1,8 +1,8 @@
-class Professor():
+class Usuario():
     def __init__(self, nome, email, senha):
         self.__nome = nome
         self.__email = email
-        self.senha = senha
+        self.__senha = senha
 
     @property
     def nome(self):

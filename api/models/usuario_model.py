@@ -4,7 +4,7 @@ from passlib.hash import pbkdf2_sha256
 
 # criar tabela
 class Usuario(db.Model):
-    __tablename__ = 'usuarop'
+    __tablename__ = 'usuario'
     id = db.Column(db.Integer, primary_key=True,
                    autoincrement=True, nullable=False)
     nome = db.Column(db.String(50), nullable=False)

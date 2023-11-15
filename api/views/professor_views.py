@@ -4,8 +4,8 @@ from ..schemas import professor_schema
 from flask import request, make_response, jsonify
 from ..entidades import professor
 from ..services import professor_service
-from ..paginate import paginate  # <==============
-from ..models.professor_model import Professor  # <==============
+from ..paginate import paginate
+from ..models.professor_model import Professor
 
 
 class ProfessorList(Resource):

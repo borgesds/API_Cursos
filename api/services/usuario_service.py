@@ -4,8 +4,8 @@ from api import db
 
 def cadatrar_usuario(usuario):
     usuario_bd = usuario_model.Usuario(nome=usuario.nome,
-                                       idade=usuario.email,
-                                       titulo=usuario.senha)
+                                       email=usuario.email,
+                                       senha=usuario.senha)
     # codificar a senha
     usuario_bd.encriptar_senha()
 

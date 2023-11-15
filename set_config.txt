@@ -1396,7 +1396,7 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
 
 56- Agora temos que criar no banco a tabela usuarios, e vamos começa pela pasta entidade criando um arquivo
     chamado usuario.py:
-        class Professor():
+        class Usuario():
             def __init__(self, nome, email, senha):
                 self.__nome = nome
                 self.__email = email
@@ -1455,7 +1455,7 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
         from marshmallow import fields
 
 
-        class ProfessorSchema(ma.SQLAlchemyAutoSchema):
+        class UsuarioSchema(ma.SQLAlchemyAutoSchema):
             class Meta:
                 model = usuario_model.Usuario
                 load_instance = True
@@ -1481,9 +1481,54 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
             db.session.commit()
             return usuario_bd
 
+60- Criar agora um arquivo na pasta views chamo usuario_views.py:
+        from flask_restful import Resource
+        from api import api
+        from ..schemas import usuario_schema
+        from flask import request, make_response, jsonify
+        from ..entidades import usuario
+        from ..services import usuario_service
 
 
+        class UsuarioList(Resource):
+            # cadastrar
+            def post(self):
+                # validar a tipagem do input
+                us = usuario_schema.UsuarioSchema()
+                validate = us.validate(request.json)
 
+                # se tiver erro
+                if validate:
+                    return make_response(jsonify(validate), 400)
+                else:
+                    nome = request.json["nome"]
+                    email = request.json["email"]
+                    senha = request.json["senha"]
+
+                    novo_usuario = usuario.Usuario(nome=nome,
+                                                   email=email,
+                                                   senha=senha)
+                    resultado = usuario_service.cadatrar_usuario(novo_usuario)
+                    x = us.jsonify(resultado)
+
+                    return make_response(x, 201)
+
+
+        api.add_resource(UsuarioList, '/usuario')
+
+61- Toda vez que fazer uma nova configuração para adcionar alguma tabela no banco temos que fazer:
+        - Vamos no arquivo principal na pasta api, __init__.py e temos que adcionar usuario_views
+          e o usuario_model para funcionar os comando a seguir:
+                from .views import curso_views, formacao_views, professor_views, usuario_views
+                from .models import curso_model, formacao_model, professor_model, usuario_model
+
+        - Ative o ambiente virtual no prompt
+
+        - Rode:
+            (venv) c:\Users\borge\OneDrive\Documentos\Repos\Github\API_Cursos>
+                - set FLASK_APP=api.py
+                - flask db migrate
+                - flask db upgrade
 
 
 
