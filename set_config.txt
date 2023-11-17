@@ -1530,6 +1530,96 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
                 - flask db migrate
                 - flask db upgrade
 
+62- Agora vamos criar o login, vamos primeiro na pasta schemas e criar um arquivo chamado logn_schema.py:
+        from api import ma
+        from ..models import usuario_model
+        from marshmallow import fields
+
+
+        class LoginSchema(ma.SQLAlchemyAutoSchema):
+            class Meta:
+                model = usuario_model.Usuario
+                load_instance = True
+                fields = ('id', 'nome', 'email', 'senha')
+
+            nome = fields.String(required=False)  # Nome não vai ser obrigatorio
+            email = fields.String(required=True)
+            senha = fields.String(required=True)
+
+63- Fazemos agora um alteração no arquivo usuario_service.py na pasta services:
+        from ..models import usuario_model
+        from api import db
+
+
+        def cadatrar_usuario(usuario):
+            usuario_bd = usuario_model.Usuario(nome=usuario.nome,
+                                               email=usuario.email,
+                                               senha=usuario.senha)
+            # codificar a senha
+            usuario_bd.encriptar_senha()
+
+            db.session.add(usuario_bd)
+            db.session.commit()
+            return usuario_bd
+
+
+        # Vamos listar os email para saber se tem login
+        def listar_usuario_email(email):
+            return usuario_model.Usuario.query.filter_by(email=email).first()
+
+64- Depois na pasta views e criar um arquivo chamado login_views.py:
+        from flask_restful import Resource
+        from api import api
+        from ..schemas import login_schema
+        from flask import request, make_response, jsonify
+        from ..services import usuario_service
+        from flask_jwt_extended import create_access_token
+        from datetime import timedelta
+
+
+        class LoginList(Resource):
+            # cadastrar
+            def post(self):
+                # validar a tipagem do input
+                ls = login_schema.LoginSchema()
+                validate = ls.validate(request.json)
+
+                # se tiver erro
+                if validate:
+                    return make_response(jsonify(validate), 400)
+                else:
+                    email = request.json["email"]
+                    senha = request.json["senha"]
+
+                    # verificar se existe o email
+                    usuario_bd = usuario_service.listar_usuario_email(email)
+
+                    if usuario_bd and usuario_bd.ver_senha(senha):
+                        access_token = create_access_token(
+                            identity=usuario_bd.id,
+                            expires_delta=timedelta(seconds=100)
+                        )
+
+                        return make_response(jsonify({
+                            'access_taken': access_token,
+                            'message': 'Login realizado com sucesso'
+                        }), 200)
+
+                    return make_response(jsonify({
+                        'message': 'Credenciais estão invalidas'
+                    }), 401)
+
+
+        api.add_resource(LoginList, '/login')
+
+        - Toda vez que criar um novo arquivo _views ou _model temos que ir na pasta raiz api e
+           adicionar eles, nesse caso so criamos o login_views:
+                from .views import curso_views, formacao_views, professor_views, usuario_views, login_views
+                from .models import curso_model, formacao_model, professor_model, usuario_model
+
+65-
+
+
 
 
 
