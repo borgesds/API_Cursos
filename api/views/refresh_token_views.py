@@ -1,49 +1,28 @@
 from flask_restful import Resource
 from api import api
-from ..schemas import login_schema
 from flask import request, make_response, jsonify
-from ..services import usuario_service
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from datetime import timedelta
 
 
-class LoginList(Resource):
-    # cadastrar
+class RefreshTokenList(Resource):
+    @jwt_required(refresh=True)
     def post(self):
-        # validar a tipagem do input
-        ls = login_schema.LoginSchema()
-        validate = ls.validate(request.json)
+        usuario_token = get_jwt_identity()
+        access_token = create_access_token(
+            identity=usuario_token,
+            expires_delta=timedelta(seconds=100)
+        )
 
-        # se tiver erro
-        if validate:
-            return make_response(jsonify(validate), 400)
-        else:
-            email = request.json["email"]
-            senha = request.json["senha"]
+        refresh_token = create_refresh_token(
+            identity=usuario_token
+        )
 
-            # verificar se existe o email
-            usuario_bd = usuario_service.listar_usuario_email(email)
-
-            if usuario_bd and usuario_bd.ver_senha(senha):
-                access_token = create_access_token(
-                    identity=usuario_bd.id,
-                    expires_delta=timedelta(seconds=100)
-                )
-
-                # recarrega o token
-                refresh_token = create_refresh_token(
-                    identity=usuario_bd.id
-                )
-
-                return make_response(jsonify({
-                    'access_taken': access_token,
-                    'refresh_token': refresh_token,
-                    'message': 'Login realizado com sucesso'
-                }), 200)
-
-            return make_response(jsonify({
-                'message': 'Credenciais estão invalidas'
-            }), 401)
+        return make_response({
+            "access_token": access_token,
+            "refresh_token": refresh_token
+        }, 200)
 
 
-api.add_resource(LoginList, '/login')
+api.add_resource(RefreshTokenList, '/token/refresh')
+
