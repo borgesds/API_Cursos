@@ -6,9 +6,11 @@ from ..entidades import formacao
 from ..services import formacao_service
 from ..paginate import paginate
 from ..models.formacao_model import Formacao
+from flask_jwt_extended import jwt_required
 
 
 class FormacaoList(Resource):
+    @jwt_required()
     def get(self):
         # formacoes = formacao_service.listar_formacoes()
         fs = formacao_schema.FormacaoSchema(many=True)
@@ -16,6 +18,7 @@ class FormacaoList(Resource):
         return paginate(Formacao, fs)
 
     # cadastrar
+    @jwt_required()
     def post(self):
         # validar a tipagem do input
         fs = formacao_schema.FormacaoSchema()
@@ -39,6 +42,7 @@ class FormacaoList(Resource):
 
 
 class FormacaoDetail(Resource):
+    @jwt_required()
     def get(self, id):
         formacao = formacao_service.listar_formacao_id(id)
 
@@ -49,6 +53,7 @@ class FormacaoDetail(Resource):
 
         return make_response(fs.jsonify(formacao), 200)
 
+    @jwt_required()
     def put(self, id):
         formacao_bd = formacao_service.listar_formacao_id(id)
 
@@ -74,6 +79,7 @@ class FormacaoDetail(Resource):
 
             return make_response(fs.jsonify(formacao_atualizado), 200)
 
+    @jwt_required()
     def delete(self, id):
         formacao_bd = formacao_service.listar_formacao_id(id)
 

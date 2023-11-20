@@ -6,9 +6,11 @@ from ..entidades import professor
 from ..services import professor_service
 from ..paginate import paginate
 from ..models.professor_model import Professor
+from flask_jwt_extended import jwt_required
 
 
 class ProfessorList(Resource):
+    @jwt_required()
     def get(self):
         # professores = professor_service.listar_professores()
         ps = professor_schema.ProfessorSchema(many=True)
@@ -16,6 +18,7 @@ class ProfessorList(Resource):
         return paginate(Professor, ps)
 
     # cadastrar
+    @jwt_required()
     def post(self):
         # validar a tipagem do input
         ps = professor_schema.ProfessorSchema()
@@ -39,6 +42,7 @@ class ProfessorList(Resource):
 
 
 class ProfessorDetail(Resource):
+    @jwt_required()
     def get(self, id):
         professor = professor_service.listar_professor_id(id)
 
@@ -49,6 +53,7 @@ class ProfessorDetail(Resource):
 
         return make_response(ps.jsonify(professor), 200)
 
+    @jwt_required()
     def put(self, id):
         professor_bd = professor_service.listar_professor_id(id)
 
@@ -74,6 +79,7 @@ class ProfessorDetail(Resource):
 
             return make_response(ps.jsonify(professor_atualizado), 200)
 
+    @jwt_required()
     def delete(self, id):
         professor_bd = professor_service.listar_professor_id(id)
 

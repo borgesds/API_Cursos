@@ -1617,14 +1617,369 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
                 from .views import curso_views, formacao_views, professor_views, usuario_views, login_views
                 from .models import curso_model, formacao_model, professor_model, usuario_model
 
-65-
+65- Com isso vamos obrigar qualquer requisição a pedir o aceso do usuario quando for chmar a API. O primeiro
+    a fazer uma modificação vai ser o arquivo curso_views.py:
+        from flask_restful import Resource
+        from api import api
+        from ..schemas import curso_schema
+        from flask import request, make_response, jsonify
+        from ..entidades import curso
+        from ..services import curso_service, formacao_service
+        from ..paginate import paginate
+        from ..models.curso_model import Curso
+        from flask_jwt_extended import jwt_required  # <========
 
 
+        class CursoList(Resource):
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def get(self):
+                # cursos = curso_service.listar_cursos()
+                cs = curso_schema.CursoSchema(many=True)
+                # return make_response(cs.jsonify(cursos), 200)
+                return paginate(Curso, cs)
+
+            # cadastrar
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def post(self):
+                # validar a tipagem do input
+                cs = curso_schema.CursoSchema()
+                validate = cs.validate(request.json)
+
+                # se tiver erro
+                if validate:
+                    return make_response(jsonify(validate), 400)
+                else:
+                    nome = request.json["nome"]
+                    descricao = request.json["descricao"]
+                    data_publicacao = request.json["data_publicacao"]
+                    formacao = request.json["formacao"]  # Puxando do curso.py (entidade)
+
+                    # Para listar a formação vamos chamar o id que retorna em formacao
+                    formacao_curso = formacao_service.listar_formacao_id(formacao)
+
+                    if formacao_curso is None:
+                        return make_response(jsonify("Formação não encontrada!!!"), 404)
+
+                    novo_curso = curso.Curso(nome=nome,
+                                             descricao=descricao,
+                                             data_publicacao=data_publicacao,
+                                             formacao=formacao_curso)  # Add formacao=formacao_curso
+                    resultado = curso_service.cadatrar_curso(novo_curso)
+                    x = cs.jsonify(resultado)
+
+                    return make_response(x, 201)
 
 
+        class CursoDetail(Resource):
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def get(self, id):
+                curso = curso_service.listar_curso_id(id)
+
+                if curso is None:
+                    return make_response(jsonify("Curso não foi encontrado"), 404)
+
+                cs = curso_schema.CursoSchema()
+
+                return make_response(cs.jsonify(curso), 200)
+
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def put(self, id):
+                curso_bd = curso_service.listar_curso_id(id)
+
+                if curso_bd is None:
+                    return make_response(jsonify("Curso não foi encontrado"), 404)
+
+                cs = curso_schema.CursoSchema()
+                validate = cs.validate(request.json)  # validar os dados
+
+                if validate:
+                    return make_response(jsonify(validate), 400)
+                else:
+                    nome = request.json["nome"]
+                    descricao = request.json["descricao"]
+                    data_publicacao = request.json["data_publicacao"]
+
+                    formacao = request.json["formacao"]  # Puxando do curso.py (entidade)
+
+                    # Para listar a formação vamos chamar o id que retorna em formacao
+                    formacao_curso = formacao_service.listar_formacao_id(formacao)
+
+                    if formacao_curso is None:
+                        return make_response(jsonify("Formação não encontrada!!!"), 404)
+
+                    novo_curso = curso.Curso(nome=nome,
+                                             descricao=descricao,
+                                             data_publicacao=data_publicacao,
+                                             formacao=formacao_curso)  # Add formacao=formacao_curso
+
+                    curso_service.atualiza_curso(curso_bd, novo_curso)
+                    curso_atualizado = curso_service.listar_curso_id(id)
+
+                    return make_response(cs.jsonify(curso_atualizado), 200)
+
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def delete(self, id):
+                curso_bd = curso_service.listar_curso_id(id)
+
+                if curso_bd is None:
+                    return make_response(jsonify("Curso não foi encontrado"), 404)
+
+                curso_service.remove_curso(curso_bd)
+
+                return make_response(jsonify("Curso excluido com sucesso"), 204)
 
 
+        api.add_resource(CursoList, '/cursos')
+        api.add_resource(CursoDetail, '/cursos/<int:id>')
 
+66- Vamos agora no arquivo formacao_views.py:
+
+        from flask_restful import Resource
+        from api import api
+        from ..schemas import formacao_schema
+        from flask import request, make_response, jsonify
+        from ..entidades import formacao
+        from ..services import formacao_service
+        from ..paginate import paginate
+        from ..models.formacao_model import Formacao
+        from flask_jwt_extended import jwt_required  # <========
+
+
+        class FormacaoList(Resource):
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def get(self):
+                # formacoes = formacao_service.listar_formacoes()
+                fs = formacao_schema.FormacaoSchema(many=True)
+                # return make_response(fs.jsonify(formacoes), 200)
+                return paginate(Formacao, fs)
+
+            # cadastrar
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def post(self):
+                # validar a tipagem do input
+                fs = formacao_schema.FormacaoSchema()
+                validate = fs.validate(request.json)
+
+                # se tiver erro
+                if validate:
+                    return make_response(jsonify(validate), 400)
+                else:
+                    nome = request.json["nome"]
+                    descricao = request.json["descricao"]
+                    professores = request.json["professores"]
+
+                    nova_formacao = formacao.Formacao(nome=nome,
+                                                      descricao=descricao,
+                                                      professores=professores)
+                    resultado = formacao_service.cadatrar_formacao(nova_formacao)
+                    x = fs.jsonify(resultado)
+
+                    return make_response(x, 201)
+
+
+        class FormacaoDetail(Resource):
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def get(self, id):
+                formacao = formacao_service.listar_formacao_id(id)
+
+                if formacao is None:
+                    return make_response(jsonify("Formação não foi encontrado"), 404)
+
+                fs = formacao_schema.FormacaoSchema()
+
+                return make_response(fs.jsonify(formacao), 200)
+
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def put(self, id):
+                formacao_bd = formacao_service.listar_formacao_id(id)
+
+                if formacao_bd is None:
+                    return make_response(jsonify("Formação não foi encontrado"), 404)
+
+                fs = formacao_schema.FormacaoSchema()
+                validate = fs.validate(request.json)  # validar os dados
+
+                if validate:
+                    return make_response(jsonify(validate), 400)
+                else:
+                    nome = request.json["nome"]
+                    descricao = request.json["descricao"]
+                    professores = request.json["professores"]
+
+                    nova_formacao = formacao.Formacao(nome=nome,
+                                                      descricao=descricao,
+                                                      professores=professores)
+
+                    formacao_service.atualiza_formacao(formacao_bd, nova_formacao)
+                    formacao_atualizado = formacao_service.listar_formacao_id(id)
+
+                    return make_response(fs.jsonify(formacao_atualizado), 200)
+
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def delete(self, id):
+                formacao_bd = formacao_service.listar_formacao_id(id)
+
+                if formacao_bd is None:
+                    return make_response(jsonify("Formação não foi encontrado"), 404)
+
+                formacao_service.remove_formacao(formacao_bd)
+
+                return make_response(jsonify("Formação excluido com sucesso"), 204)
+
+
+        api.add_resource(FormacaoList, '/formacoes')
+        api.add_resource(FormacaoDetail, '/formacoes/<int:id>')
+
+67- Vamos agora no arquivo professor_views.py:
+        from flask_restful import Resource
+        from api import api
+        from ..schemas import professor_schema
+        from flask import request, make_response, jsonify
+        from ..entidades import professor
+        from ..services import professor_service
+        from ..paginate import paginate
+        from ..models.professor_model import Professor
+        from flask_jwt_extended import jwt_required  # <========
+
+
+        class ProfessorList(Resource):
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def get(self):
+                # professores = professor_service.listar_professores()
+                ps = professor_schema.ProfessorSchema(many=True)
+                # return make_response(ps.jsonify(professores), 200)
+                return paginate(Professor, ps)
+
+            # cadastrar
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def post(self):
+                # validar a tipagem do input
+                ps = professor_schema.ProfessorSchema()
+                validate = ps.validate(request.json)
+
+                # se tiver erro
+                if validate:
+                    return make_response(jsonify(validate), 400)
+                else:
+                    nome = request.json["nome"]
+                    idade = request.json["idade"]
+                    titulo = request.json["titulo"]
+
+                    novo_professor = professor.Professor(nome=nome,
+                                                         idade=idade,
+                                                         titulo=titulo)
+                    resultado = professor_service.cadatrar_professor(novo_professor)
+                    x = ps.jsonify(resultado)
+
+                    return make_response(x, 201)
+
+
+        class ProfessorDetail(Resource):
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def get(self, id):
+                professor = professor_service.listar_professor_id(id)
+
+                if professor is None:
+                    return make_response(jsonify("Professor não foi encontrado"), 404)
+
+                ps = professor_schema.ProfessorSchema()
+
+                return make_response(ps.jsonify(professor), 200)
+
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def put(self, id):
+                professor_bd = professor_service.listar_professor_id(id)
+
+                if professor_bd is None:
+                    return make_response(jsonify("Professor não foi encontrado"), 404)
+
+                ps = professor_schema.ProfessorSchema()
+                validate = ps.validate(request.json)  # validar os dados
+
+                if validate:
+                    return make_response(jsonify(validate), 400)
+                else:
+                    nome = request.json["nome"]
+                    idade = request.json["idade"]
+                    titulo = request.json["titulo"]
+
+                    novo_professor = professor.Professor(nome=nome,
+                                                         idade=idade,
+                                                         titulo=titulo)
+
+                    professor_service.atualiza_professor(professor_bd, novo_professor)
+                    professor_atualizado = professor_service.listar_professor_id(id)
+
+                    return make_response(ps.jsonify(professor_atualizado), 200)
+
+            @jwt_required()  # Todo os metodos será obrigatorio os tokens
+            def delete(self, id):
+                professor_bd = professor_service.listar_professor_id(id)
+
+                if professor_bd is None:
+                    return make_response(jsonify("Professor não foi encontrado"), 404)
+
+                professor_service.remove_professor(professor_bd)
+
+                return make_response(jsonify("Professor excluido com sucesso"), 204)
+
+
+        api.add_resource(ProfessorList, '/professores')
+        api.add_resource(ProfessorDetail, '/professor/<int:id>')
+
+68- Desse modo a API vai sempre pedir um tohen, mas o problema que dura pouco então vamos fazer um recurso
+    de refresh do token, vamos no arquivo login_views.py:
+        from flask_restful import Resource
+        from api import api
+        from ..schemas import login_schema
+        from flask import request, make_response, jsonify
+        from ..services import usuario_service
+        from flask_jwt_extended import create_access_token, create_refresh_token  # <=====
+        from datetime import timedelta
+
+
+        class LoginList(Resource):
+            # cadastrar
+            def post(self):
+                # validar a tipagem do input
+                ls = login_schema.LoginSchema()
+                validate = ls.validate(request.json)
+
+                # se tiver erro
+                if validate:
+                    return make_response(jsonify(validate), 400)
+                else:
+                    email = request.json["email"]
+                    senha = request.json["senha"]
+
+                    # verificar se existe o email
+                    usuario_bd = usuario_service.listar_usuario_email(email)
+
+                    if usuario_bd and usuario_bd.ver_senha(senha):
+                        access_token = create_access_token(
+                            identity=usuario_bd.id,
+                            expires_delta=timedelta(seconds=100)
+                        )
+
+                        # recarrega o token  <============
+                        refresh_token = create_refresh_token(
+                            identity=usuario_bd.id
+                        )
+
+                        return make_response(jsonify({
+                            'access_taken': access_token,
+                            'refresh_token': refresh_token,  # <============
+                            'message': 'Login realizado com sucesso'
+                        }), 200)
+
+                    return make_response(jsonify({
+                        'message': 'Credenciais estão invalidas'
+                    }), 401)
+
+
+        api.add_resource(LoginList, '/login')
+
+69- Vamos na pasta views e criar um arquivo chamado refresh_token_views.py
 
 
 

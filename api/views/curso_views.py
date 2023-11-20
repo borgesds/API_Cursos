@@ -4,11 +4,13 @@ from ..schemas import curso_schema
 from flask import request, make_response, jsonify
 from ..entidades import curso
 from ..services import curso_service, formacao_service
-from ..paginate import paginate  # <==============
-from ..models.curso_model import Curso  # <==============
+from ..paginate import paginate
+from ..models.curso_model import Curso
+from flask_jwt_extended import jwt_required
 
 
 class CursoList(Resource):
+    @jwt_required()
     def get(self):
         # cursos = curso_service.listar_cursos()
         cs = curso_schema.CursoSchema(many=True)
@@ -16,6 +18,7 @@ class CursoList(Resource):
         return paginate(Curso, cs)
 
     # cadastrar
+    @jwt_required()
     def post(self):
         # validar a tipagem do input
         cs = curso_schema.CursoSchema()
@@ -47,6 +50,7 @@ class CursoList(Resource):
 
 
 class CursoDetail(Resource):
+    @jwt_required()
     def get(self, id):
         curso = curso_service.listar_curso_id(id)
 
@@ -57,6 +61,7 @@ class CursoDetail(Resource):
 
         return make_response(cs.jsonify(curso), 200)
 
+    @jwt_required()
     def put(self, id):
         curso_bd = curso_service.listar_curso_id(id)
 
@@ -91,6 +96,7 @@ class CursoDetail(Resource):
 
             return make_response(cs.jsonify(curso_atualizado), 200)
 
+    @jwt_required()
     def delete(self, id):
         curso_bd = curso_service.listar_curso_id(id)
 

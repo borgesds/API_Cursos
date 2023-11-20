@@ -4,6 +4,7 @@ from ..schemas import usuario_schema
 from flask import request, make_response, jsonify
 from ..entidades import usuario
 from ..services import usuario_service
+from flask_jwt_extended import jwt_required  # <========
 
 
 class UsuarioList(Resource):
