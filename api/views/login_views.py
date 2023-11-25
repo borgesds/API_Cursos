@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from api import api
+from api import api, jwt  # <========
 from ..schemas import login_schema
 from flask import request, make_response, jsonify
 from ..services import usuario_service
@@ -8,6 +8,17 @@ from datetime import timedelta
 
 
 class LoginList(Resource):
+    # busca o usuario para saber qual a importacia dele em is_adimmin(True ou False)
+    @jwt.additional_claims_loader
+    def add_claims_to_acess_token(identity):
+        usuario_token = usuario_service.listar_usuario_id(identity)
+        if usuario_token.is_admin:
+            roles = 'admin'
+        else:
+            roles = 'user'
+
+        return {'roles': roles}
+
     # cadastrar
     def post(self):
         # validar a tipagem do input

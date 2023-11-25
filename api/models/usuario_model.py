@@ -10,6 +10,7 @@ class Usuario(db.Model):
     nome = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     senha = db.Column(db.String(255), nullable=True)
+    is_admin = db.Column(db.Boolean)
 
     # vamos criptografar a senha para enviar ao banco
     def encriptar_senha(self):

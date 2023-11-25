@@ -2013,7 +2013,189 @@ vai em project: nome_projeto >> python interpreter >> + >> pesquisar bibliotecas
             from .views import curso_views, formacao_views, professor_views,
                                usuario_views, login_views, refresh_token_views
 
-70-
+70- Controle de acesso que o usuarario vai ter, isso possibilitamai segurança. vamos ter que atualizar
+    todos os arquivos em todas as pastas:
+        - Começamos pelo arquivo usuario.py da pasta entidade:
+            class Usuario():
+                def __init__(self, nome, email, senha, is_admin):  # <=======
+                    self.__nome = nome
+                    self.__email = email
+                    self.__senha = senha
+                    self.__is_admin = is_admin
+
+                @property
+                def nome(self):
+                    return self.__nome
+
+                @nome.setter
+                def nome(self, nome):
+                    self.__nome = nome
+
+                @property
+                def email(self):
+                    return self.__email
+
+                @email.setter
+                def email(self, email):
+                    self.__email = email
+
+                @property
+                def senha(self):
+                    return self.__senha
+
+                @senha.setter
+                def senha(self, senha):
+                    self.__senha = senha
+
+                @property  # <=======
+                def is_admin(self):
+                    return self.__is_admin
+
+                @is_admin.setter  # <=======
+                def is_admin(self, is_admin):
+                    self.__is_admin = is_admin
+
+        - Agora dentro da pasta models atualize o arquivo usuario_model.py:
+            from api import db
+            from passlib.hash import pbkdf2_sha256
+
+
+            # criar tabela
+            class Usuario(db.Model):
+                __tablename__ = 'usuario'
+                id = db.Column(db.Integer, primary_key=True,
+                               autoincrement=True, nullable=False)
+                nome = db.Column(db.String(50), nullable=False)
+                email = db.Column(db.String(100), nullable=False)
+                senha = db.Column(db.String(255), nullable=True)
+                is_admin = db.Column(db.Boolean)  # <==============
+
+                # vamos criptografar a senha para enviar ao banco
+                def encriptar_senha(self):
+                    self.senha = pbkdf2_sha256.hash(self.senha)
+
+                # verificar qual o formato da senha criptografada
+                def ver_senha(self, senha):
+                    return pbkdf2_sha256.verify(senha, self.senha)
+
+        - No arquivo usuario_schema.py na pasta schemas:
+            from api import ma
+            from ..models import usuario_model
+            from marshmallow import fields
+
+
+            class UsuarioSchema(ma.SQLAlchemyAutoSchema):
+                class Meta:
+                    model = usuario_model.Usuario
+                    load_instance = True
+                    fields = ('id', 'nome', 'email', 'senha', 'is_admin')  # <===
+
+                nome = fields.String(required=True)
+                email = fields.String(required=True)
+                senha = fields.String(required=True)
+                is_admin = fields.Boolean(required=True)  # <===
+
+        - Na pasta services o arquivo usuario_service.py:
+            from ..models import usuario_model
+            from api import db
+
+
+            def cadatrar_usuario(usuario):
+                usuario_bd = usuario_model.Usuario(nome=usuario.nome,
+                                                   email=usuario.email,
+                                                   senha=usuario.senha,
+                                                   is_admin=usuario.is_admin)  # <====
+                # codificar a senha
+                usuario_bd.encriptar_senha()
+
+                db.session.add(usuario_bd)
+                db.session.commit()
+                return usuario_bd
+
+
+            # Vamos listar os email para saber se tem login
+            def listar_usuario_email(email):
+                return usuario_model.Usuario.query.filter_by(email=email).first()
+
+        - Agora na pasta views no arquivo usuario_views.py:
+            from flask_restful import Resource
+            from api import api
+            from ..schemas import usuario_schema
+            from flask import request, make_response, jsonify
+            from ..entidades import usuario
+            from ..services import usuario_service
+            from flask_jwt_extended import jwt_required
+
+
+            class UsuarioList(Resource):
+                # cadastrar
+                def post(self):
+                    # validar a tipagem do input
+                    us = usuario_schema.UsuarioSchema()
+                    validate = us.validate(request.json)
+
+                    # se tiver erro
+                    if validate:
+                        return make_response(jsonify(validate), 400)
+                    else:
+                        nome = request.json["nome"]
+                        email = request.json["email"]
+                        senha = request.json["senha"]
+                        is_admin = request.json["is_admin"]  # <=======
+
+                        novo_usuario = usuario.Usuario(nome=nome,
+                                                       email=email,
+                                                       senha=senha,
+                                                       is_admin=is_admin)  # <=======
+
+                        resultado = usuario_service.cadatrar_usuario(novo_usuario)
+                        x = us.jsonify(resultado)
+
+                        return make_response(x, 201)
+
+
+            api.add_resource(UsuarioList, '/usuario')
+
+71- Fizemos alteções no arquivos adcionando amis uma coluna então temos que rodar o migrate:
+        - Ative o ambiente virtual no prompt
+
+        - Rode:
+            (venv) c:\Users\borge\OneDrive\Documentos\Repos\Github\API_Cursos>
+                - set FLASK_APP=api.py
+                - flask db migrate
+                - flask db upgrade
+
+72- Vamos na pasta services e no arquivo usuario_service.py para listar o usuario pelo id dele:
+        from ..models import usuario_model
+        from api import db
+
+
+        def cadatrar_usuario(usuario):
+            usuario_bd = usuario_model.Usuario(nome=usuario.nome,
+                                               email=usuario.email,
+                                               senha=usuario.senha,
+                                               is_admin=usuario.is_admin)  # <====
+            # codificar a senha
+            usuario_bd.encriptar_senha()
+
+            db.session.add(usuario_bd)
+            db.session.commit()
+            return usuario_bd
+
+
+        # Vamos listar os email para saber se tem login
+        def listar_usuario_email(email):
+            return usuario_model.Usuario.query.filter_by(email=email).first()
+
+
+        def listar_usuario_id(id):  # <===================
+            return usuario_model.Usuario.query.filter_by(id=id).first()
+
+73- Agora quando for logar o valor do is_admin deve ser considerado então vai dentro da pasta views
+    no arquivo login_views.py e atualize:
+
+
+
 
 
 

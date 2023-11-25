@@ -4,7 +4,7 @@ from ..schemas import usuario_schema
 from flask import request, make_response, jsonify
 from ..entidades import usuario
 from ..services import usuario_service
-from flask_jwt_extended import jwt_required  # <========
+from flask_jwt_extended import jwt_required
 
 
 class UsuarioList(Resource):
@@ -21,10 +21,13 @@ class UsuarioList(Resource):
             nome = request.json["nome"]
             email = request.json["email"]
             senha = request.json["senha"]
+            is_admin = request.json["is_admin"]
 
             novo_usuario = usuario.Usuario(nome=nome,
                                            email=email,
-                                           senha=senha)
+                                           senha=senha,
+                                           is_admin=is_admin)
+
             resultado = usuario_service.cadatrar_usuario(novo_usuario)
             x = us.jsonify(resultado)
 
