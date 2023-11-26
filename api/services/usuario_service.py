@@ -6,7 +6,8 @@ def cadatrar_usuario(usuario):
     usuario_bd = usuario_model.Usuario(nome=usuario.nome,
                                        email=usuario.email,
                                        senha=usuario.senha,
-                                       is_admin=usuario.is_admin)  # <====
+                                       is_admin=usuario.is_admin,
+                                       api_key=usuario.api_key)
     # codificar a senha
     usuario_bd.encriptar_senha()
 
@@ -22,3 +23,7 @@ def listar_usuario_email(email):
 
 def listar_usuario_id(id):
     return usuario_model.Usuario.query.filter_by(id=id).first()
+
+
+def listar_usuario_api_key(api_key):
+    return usuario_model.Usuario.query.filter_by(api_key=api_key).first()
