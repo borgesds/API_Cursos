@@ -6,7 +6,8 @@ from ..entidades import curso
 from ..services import curso_service, formacao_service
 from ..paginate import paginate
 from ..models.curso_model import Curso
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt
+from ..decorator import admin_required
 
 
 class CursoList(Resource):
@@ -18,8 +19,20 @@ class CursoList(Resource):
         return paginate(Curso, cs)
 
     # cadastrar
-    @jwt_required()
+    # agora chamaos o decorator que nos criasmo para fazer auteticação
+    # @jwt_required()
+    @admin_required
     def post(self):
+        """
+        # verificar se o usuario é um admin para ter acesso a esse metodo
+        claims = get_jwt()
+        if claims['roles'] != 'admin':
+            return make_response(
+                jsonify(mensagem='Não é permitido esse recurso, só admin!'),
+                403
+            )
+        """
+
         # validar a tipagem do input
         cs = curso_schema.CursoSchema()
         validate = cs.validate(request.json)
@@ -61,7 +74,9 @@ class CursoDetail(Resource):
 
         return make_response(cs.jsonify(curso), 200)
 
-    @jwt_required()
+    # agora chamaos o decorator que nos criasmo para fazer auteticação
+    # @jwt_required()
+    @admin_required
     def put(self, id):
         curso_bd = curso_service.listar_curso_id(id)
 
@@ -96,7 +111,9 @@ class CursoDetail(Resource):
 
             return make_response(cs.jsonify(curso_atualizado), 200)
 
-    @jwt_required()
+    # agora chamaos o decorator que nos criasmo para fazer auteticação
+    # @jwt_required()
+    @admin_required
     def delete(self, id):
         curso_bd = curso_service.listar_curso_id(id)
 
